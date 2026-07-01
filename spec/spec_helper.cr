@@ -24,3 +24,7 @@ Marten.configure :test do |config|
     db.name = ":memory:"
   end
 end
+
+Spec.after_each do
+  Marten::CDNCache.settings.reset!
+end

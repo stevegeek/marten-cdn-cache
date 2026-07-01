@@ -2,6 +2,7 @@ require "marten"
 require "./marten_cdn_cache/cookies_patch"
 require "./marten_cdn_cache/policy"
 require "./marten_cdn_cache/rule"
+require "./marten_cdn_cache/settings"
 
 # CDN-friendly cache-control middleware for Marten.
 #
@@ -11,6 +12,11 @@ require "./marten_cdn_cache/rule"
 # caching via settings rules or handler concerns.
 module Marten::CDNCache
   VERSION = "0.1.0"
+
+  # Typed accessor for this shard's settings namespace.
+  def self.settings : Settings
+    Marten.settings.cdn_cache.as(Settings)
+  end
 
   # Resolves a parameterless named route to its handler class. Returns nil if
   # the route does not exist or cannot be reversed without parameters.
