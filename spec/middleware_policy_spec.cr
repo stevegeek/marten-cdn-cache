@@ -62,5 +62,13 @@ describe Marten::CDNCache::Middleware do
       response = run_middleware(request_for("/unknown"), Marten::HTTP::Response.new("body"))
       response.headers["Cache-Control"]?.should be_nil
     end
+
+    it "strips the internal policy header even when disabled" do
+      Marten::CDNCache.settings.enabled = false
+      response = Marten::HTTP::Response.new("body")
+      response.headers[Marten::CDNCache::Middleware::INTERNAL_POLICY_HEADER] = "private;max_age=;s_maxage=;immutable=false;strip_cookies=false"
+      run_middleware(request_for("/cached"), response)
+      response.headers[Marten::CDNCache::Middleware::INTERNAL_POLICY_HEADER]?.should be_nil
+    end
   end
 end

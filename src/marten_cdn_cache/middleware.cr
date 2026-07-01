@@ -15,7 +15,13 @@ module Marten::CDNCache
       get_response : Proc(Marten::HTTP::Response),
     ) : Marten::HTTP::Response
       response = get_response.call
-      return response unless Marten::CDNCache.settings.enabled
+
+      unless Marten::CDNCache.settings.enabled
+        # Still scrub the internal header so it never reaches the HTTP client,
+        # even when the middleware is disabled (a handler concern may have set it).
+        response.headers.delete(INTERNAL_POLICY_HEADER)
+        return response
+      end
 
       policy = resolve_policy(request, response)
       apply(policy, response)
