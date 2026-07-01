@@ -38,6 +38,12 @@ module Marten::CDNCache
     end
 
     private def candidate_policy(request : Marten::HTTP::Request, response : Marten::HTTP::Response) : Policy
+      # A handler opt-in/out (via the internal header) wins over settings rules.
+      if header = response.headers[INTERNAL_POLICY_HEADER]?
+        response.headers.delete(INTERNAL_POLICY_HEADER)
+        return Policy.deserialize(header)
+      end
+
       Marten::CDNCache.settings.rules.each do |rule|
         return rule.policy if rule.matches?(request)
       end

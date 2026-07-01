@@ -23,6 +23,12 @@ Marten.configure :test do |config|
     db.backend = :sqlite
     db.name = ":memory:"
   end
+
+  config.middleware = [
+    Marten::CDNCache::Middleware,
+    Marten::Middleware::Session,
+    Marten::Middleware::Flash,
+  ]
 end
 
 Spec.after_each do
