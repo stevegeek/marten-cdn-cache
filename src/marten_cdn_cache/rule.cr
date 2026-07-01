@@ -21,17 +21,18 @@ module Marten::CDNCache
     # blog / static-page case). Routes that require parameters cannot be reversed
     # without them — use `.path_prefix` or `.predicate` for those.
     def self.route_name(name : String, policy : Policy) : Rule
+      # Resolve the handler class once at construction — it's stable after
+      # startup. Per-request matching then only needs one resolve() call.
+      # If the route is unknown at construction time, target is nil and the
+      # matcher safely returns false without crashing.
+      target = Marten::CDNCache.route_handler_for(name)
       new(
         ->(request : Marten::HTTP::Request) do
-          target = Marten::CDNCache.route_handler_for(name)
-          if target.nil?
+          return false if target.nil?
+          begin
+            Marten.routes.resolve(request.path).handler == target
+          rescue Marten::Routing::Errors::NoResolveMatch
             false
-          else
-            begin
-              Marten.routes.resolve(request.path).handler == target
-            rescue Marten::Routing::Errors::NoResolveMatch
-              false
-            end
           end
         end,
         policy,
