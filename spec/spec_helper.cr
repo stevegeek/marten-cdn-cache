@@ -6,6 +6,8 @@ require "../src/marten_cdn_cache"
 require "marten/spec"
 
 require "./test_project/app"
+require "./test_project/handlers"
+require "./test_project/routes"
 
 # Fixed test secret — reproducible failures beat per-run randomness. Must stay
 # >= 32 bytes to satisfy Marten's secret-key length guidance.
