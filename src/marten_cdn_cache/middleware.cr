@@ -18,7 +18,7 @@ module Marten::CDNCache
       return response unless Marten::CDNCache.settings.enabled
 
       policy = resolve_policy(request, response)
-      response.headers["Cache-Control"] = policy.cache_control_header
+      apply(policy, response)
       response
     end
 
@@ -47,6 +47,45 @@ module Marten::CDNCache
     private def cacheable_method?(request : Marten::HTTP::Request) : Bool
       method = request.method.upcase
       method == "GET" || method == "HEAD"
+    end
+
+    # Applies the resolved policy to the response. On a public + strip_cookies
+    # policy it scrubs the session cookie and `Vary: Cookie` so a CDN can cache
+    # the response — UNLESS the response still carries a CSRF cookie, in which
+    # case it conservatively downgrades to the default (never cache a tokened
+    # page, never drop the token).
+    private def apply(policy : Policy, response : Marten::HTTP::Response) : Nil
+      if policy.public? && policy.strip_cookies && carries_csrf_cookie?(response)
+        policy = Marten::CDNCache.settings.default_policy
+      end
+
+      response.headers["Cache-Control"] = policy.cache_control_header
+
+      strip_cookies(response) if policy.public? && policy.strip_cookies
+    end
+
+    private def carries_csrf_cookie?(response : Marten::HTTP::Response) : Bool
+      csrf_name = Marten.settings.csrf.cookie_name
+      response.cookies.pending_set_cookies.any? { |cookie| cookie.name == csrf_name }
+    end
+
+    # Drops the session `Set-Cookie` and removes `Cookie` from `Vary`. Other
+    # `Vary` tokens (`Accept-Encoding`, `Accept-Language`) are preserved.
+    private def strip_cookies(response : Marten::HTTP::Response) : Nil
+      response.cookies.drop_set_cookie(Marten.settings.sessions.cookie_name)
+
+      vary = response.headers["Vary"]?
+      return if vary.nil?
+
+      remaining = vary
+        .split(/\s*,\s*/)
+        .reject { |token| token.downcase == "cookie" || token.empty? }
+
+      if remaining.empty?
+        response.headers.delete("Vary")
+      else
+        response.headers["Vary"] = remaining.join(", ")
+      end
     end
   end
 end
