@@ -71,4 +71,15 @@ describe Marten::CDNCache::Middleware do
       response.headers[Marten::CDNCache::Middleware::INTERNAL_POLICY_HEADER]?.should be_nil
     end
   end
+
+  describe "#call method guard with public default_policy" do
+    it "forces private, no-store for POST even when default_policy is public" do
+      Marten::CDNCache.settings.default_policy = Marten::CDNCache::Policy.public_cached(max_age: 60)
+      Marten::CDNCache.settings.rules = [
+        Marten::CDNCache::Rule.route_name("contact", Marten::CDNCache::Policy.public_cached(max_age: 300)),
+      ]
+      response = run_middleware(request_for("/contact", method: "POST"), Marten::HTTP::Response.new("ok"))
+      response.headers["Cache-Control"].should eq "private, no-store"
+    end
+  end
 end

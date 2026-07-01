@@ -72,5 +72,19 @@ describe Marten::CDNCache::Middleware do
       response.cookies.pending_set_cookies.map(&.name)
         .should contain Marten.settings.csrf.cookie_name
     end
+
+    it "forces private, no-store even when default_policy is public" do
+      Marten::CDNCache.settings.default_policy = Marten::CDNCache::Policy.public_cached(max_age: 60)
+      Marten::CDNCache.settings.rules = [public_rule("/blog")]
+
+      response = Marten::HTTP::Response.new("blog")
+      response.cookies.set(Marten.settings.csrf.cookie_name, "tok")
+
+      run_middleware(request_for("/blog"), response)
+
+      response.headers["Cache-Control"].should eq "private, no-store"
+      response.cookies.pending_set_cookies.map(&.name)
+        .should contain Marten.settings.csrf.cookie_name
+    end
   end
 end

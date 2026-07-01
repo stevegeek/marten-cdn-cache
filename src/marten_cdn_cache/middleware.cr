@@ -35,9 +35,10 @@ module Marten::CDNCache
       candidate = candidate_policy(request, response)
 
       # Hard safety net: only GET/HEAD may ever be public-cached. Anything else
-      # (form submit, admin mutation) is forced back to the conservative default.
+      # (form submit, admin mutation) must be private, no-store unconditionally —
+      # never the user-configured default_policy, which may itself be public.
       if candidate.public? && !cacheable_method?(request)
-        return Marten::CDNCache.settings.default_policy
+        return Policy.private_no_store
       end
 
       candidate
@@ -68,7 +69,10 @@ module Marten::CDNCache
     # page, never drop the token).
     private def apply(policy : Policy, response : Marten::HTTP::Response) : Nil
       if policy.public? && policy.strip_cookies && carries_csrf_cookie?(response)
-        policy = Marten::CDNCache.settings.default_policy
+        # CSRF safety net: never cache a response that sets a CSRF token.
+        # Use Policy.private_no_store unconditionally — the user-configured
+        # default_policy may be public and would defeat this invariant.
+        policy = Policy.private_no_store
       end
 
       response.headers["Cache-Control"] = policy.cache_control_header
