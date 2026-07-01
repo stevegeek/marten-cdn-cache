@@ -12,6 +12,12 @@ describe "handler cache concerns" do
       response.headers[Marten::CDNCache::Middleware::INTERNAL_POLICY_HEADER]?.should be_nil
     end
 
+    it "scrubs the internal policy header even when middleware is disabled" do
+      Marten::CDNCache.settings.enabled = false
+      response = Marten::Spec.client.get("/cached")
+      response.headers[Marten::CDNCache::Middleware::INTERNAL_POLICY_HEADER]?.should be_nil
+    end
+
     it "wins over a conflicting settings rule" do
       Marten::CDNCache.settings.rules = [
         Marten::CDNCache::Rule.path_prefix("/cached", Marten::CDNCache::Policy.private_no_store),
