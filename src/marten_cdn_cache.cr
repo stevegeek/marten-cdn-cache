@@ -1,4 +1,5 @@
 require "marten"
+require "./marten_cdn_cache/cookies_patch"
 
 # CDN-friendly cache-control middleware for Marten.
 #
