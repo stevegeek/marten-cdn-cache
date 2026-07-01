@@ -27,4 +27,13 @@ module Test
       respond("never cached")
     end
   end
+
+  # Touches the session so Session middleware emits a Set-Cookie, letting the
+  # integration spec prove the cookie is stripped on a public response.
+  class SessionPageHandler < Marten::Handler
+    def get
+      request.session[:visited] = "1"
+      respond("session page")
+    end
+  end
 end
