@@ -13,7 +13,7 @@ require "./marten_cdn_cache/concerns"
 # default is conservative — `private, no-store` — and routes opt INTO public
 # caching via settings rules or handler concerns.
 module Marten::CDNCache
-  VERSION = "0.1.1"
+  VERSION = "0.1.2"
 
   # Typed accessor for this shard's settings namespace.
   def self.settings : Settings

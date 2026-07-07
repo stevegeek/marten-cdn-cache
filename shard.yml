@@ -1,5 +1,5 @@
 name: marten_cdn_cache
-version: 0.1.1
+version: 0.1.2
 
 authors:
   - Stephen Ierodiaconou <stevegeek@gmail.com>
@@ -11,9 +11,9 @@ license: MIT
 dependencies:
   marten:
     github: martenframework/marten
-    # Track main (marten has no version tags); smtp-emailing pins branch:main,
-    # so a bare `*` here can't coexist with it in the same graph.
-    branch: main
+    # marten publishes no version tags; match marten-smtp-emailing's version-based
+    # requirement so both resolve. Pin an exact commit via shard.override.yml if needed.
+    version: ">= 0.2.0"
 
 development_dependencies:
   sqlite3:
