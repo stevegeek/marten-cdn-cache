@@ -23,6 +23,14 @@ describe Marten::CDNCache::Settings do
     Marten::CDNCache.settings.default_policy.cache_control_header.should eq "public, max-age=60"
   end
 
+  it "answers enabled through the query getter and the plain getter" do
+    Marten::CDNCache.settings.enabled = false
+    Marten::CDNCache.settings.enabled?.should be_false
+    Marten::CDNCache.settings.enabled.should be_false
+    Marten::CDNCache.settings.reset!
+    Marten::CDNCache.settings.enabled?.should be_true
+  end
+
   it "resets back to defaults" do
     Marten::CDNCache.settings.enabled = false
     Marten::CDNCache.settings.reset!

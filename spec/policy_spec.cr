@@ -9,6 +9,14 @@ describe Marten::CDNCache::Policy do
       policy.strip_cookies.should be_false
     end
 
+    it "answers the boolean flags through query getters and plain getters" do
+      policy = Marten::CDNCache::Policy.new(immutable: true, strip_cookies: true)
+      policy.immutable?.should be_true
+      policy.strip_cookies?.should be_true
+      policy.immutable.should be_true
+      policy.strip_cookies.should be_true
+    end
+
     it "rejects an unknown visibility" do
       expect_raises(ArgumentError, /visibility/) do
         Marten::CDNCache::Policy.new(visibility: :secret)

@@ -10,8 +10,8 @@ module Marten::CDNCache
     getter visibility : Symbol
     getter max_age : Int32?
     getter s_maxage : Int32?
-    getter immutable : Bool
-    getter strip_cookies : Bool
+    getter? immutable : Bool
+    getter? strip_cookies : Bool
 
     def initialize(
       @visibility : Symbol = :private,
@@ -23,6 +23,14 @@ module Marten::CDNCache
       unless VALID_VISIBILITIES.includes?(@visibility)
         raise ArgumentError.new("Invalid visibility #{@visibility.inspect}; expected :public or :private")
       end
+    end
+
+    def immutable : Bool
+      @immutable
+    end
+
+    def strip_cookies : Bool
+      @strip_cookies
     end
 
     # The conservative default: not cacheable anywhere.
@@ -105,7 +113,7 @@ module Marten::CDNCache
     end
 
     private def self.parse_int(value : String?) : Int32?
-      return nil if value.nil? || value.empty?
+      return if value.nil? || value.empty?
       value.to_i?
     end
   end
