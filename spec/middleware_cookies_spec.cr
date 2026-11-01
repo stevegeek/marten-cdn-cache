@@ -11,7 +11,7 @@ private def request_for(path : String, method : String = "GET") : Marten::HTTP::
 end
 
 private def run_middleware(request : Marten::HTTP::Request, response : Marten::HTTP::Response) : Marten::HTTP::Response
-  Marten::CDNCache::Middleware.new.call(request, ->{ response })
+  Marten::CDNCache::Middleware.new.call(request, -> { response })
 end
 
 private def public_rule(path : String) : Marten::CDNCache::Rule
