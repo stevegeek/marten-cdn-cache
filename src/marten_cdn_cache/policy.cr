@@ -10,8 +10,8 @@ module Marten::CDNCache
     getter visibility : Symbol
     getter max_age : Int32?
     getter s_maxage : Int32?
-    getter immutable : Bool
-    getter strip_cookies : Bool
+    getter? immutable : Bool
+    getter? strip_cookies : Bool
 
     def initialize(
       @visibility : Symbol = :private,
@@ -52,6 +52,16 @@ module Marten::CDNCache
       new(visibility: :public, max_age: max_age, immutable: true, strip_cookies: true)
     end
 
+    @[Deprecated("Use `#immutable?` instead.")]
+    def immutable : Bool
+      immutable?
+    end
+
+    @[Deprecated("Use `#strip_cookies?` instead.")]
+    def strip_cookies : Bool
+      strip_cookies?
+    end
+
     def public? : Bool
       visibility == :public
     end
@@ -63,7 +73,7 @@ module Marten::CDNCache
           io << "public"
           io << ", max-age=" << max_age if max_age
           io << ", s-maxage=" << s_maxage if s_maxage
-          io << ", immutable" if immutable
+          io << ", immutable" if immutable?
         end
       elsif age = max_age
         "private, max-age=#{age}"
@@ -80,8 +90,8 @@ module Marten::CDNCache
         io << visibility
         io << ";max_age=" << max_age
         io << ";s_maxage=" << s_maxage
-        io << ";immutable=" << immutable
-        io << ";strip_cookies=" << strip_cookies
+        io << ";immutable=" << immutable?
+        io << ";strip_cookies=" << strip_cookies?
       end
     end
 
@@ -105,7 +115,7 @@ module Marten::CDNCache
     end
 
     private def self.parse_int(value : String?) : Int32?
-      return nil if value.nil? || value.empty?
+      return if value.nil? || value.empty?
       value.to_i?
     end
   end

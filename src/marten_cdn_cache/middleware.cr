@@ -16,7 +16,7 @@ module Marten::CDNCache
     ) : Marten::HTTP::Response
       response = get_response.call
 
-      unless Marten::CDNCache.settings.enabled
+      unless Marten::CDNCache.settings.enabled?
         # Still scrub the internal header so it never reaches the HTTP client,
         # even when the middleware is disabled (a handler concern may have set it).
         response.headers.delete(INTERNAL_POLICY_HEADER)
@@ -68,7 +68,7 @@ module Marten::CDNCache
     # case it conservatively downgrades to the default (never cache a tokened
     # page, never drop the token).
     private def apply(policy : Policy, response : Marten::HTTP::Response) : Nil
-      if policy.public? && policy.strip_cookies && carries_csrf_cookie?(response)
+      if policy.public? && policy.strip_cookies? && carries_csrf_cookie?(response)
         # CSRF safety net: never cache a response that sets a CSRF token.
         # Use Policy.private_no_store unconditionally — the user-configured
         # default_policy may be public and would defeat this invariant.
@@ -77,7 +77,7 @@ module Marten::CDNCache
 
       response.headers["Cache-Control"] = policy.cache_control_header
 
-      strip_cookies(response) if policy.public? && policy.strip_cookies
+      strip_cookies(response) if policy.public? && policy.strip_cookies?
     end
 
     private def carries_csrf_cookie?(response : Marten::HTTP::Response) : Bool

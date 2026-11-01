@@ -5,8 +5,13 @@ module Marten::CDNCache
   class Settings < Marten::Conf::Settings
     namespace :cdn_cache
 
-    property enabled : Bool = true
+    property? enabled : Bool = true
     property rules : Array(Rule) = [] of Rule
+
+    @[Deprecated("Use `#enabled?` instead.")]
+    def enabled : Bool
+      enabled?
+    end
 
     @default_policy : Policy?
 

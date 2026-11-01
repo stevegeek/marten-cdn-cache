@@ -6,7 +6,7 @@ describe Marten::CDNCache::Policy do
       policy = Marten::CDNCache::Policy.new
       policy.visibility.should eq :private
       policy.public?.should be_false
-      policy.strip_cookies.should be_false
+      policy.strip_cookies?.should be_false
     end
 
     it "rejects an unknown visibility" do
@@ -39,13 +39,13 @@ describe Marten::CDNCache::Policy do
 
   describe "convenience constructors" do
     it "public_cached strips cookies by default" do
-      Marten::CDNCache::Policy.public_cached(max_age: 300).strip_cookies.should be_true
+      Marten::CDNCache::Policy.public_cached(max_age: 300).strip_cookies?.should be_true
     end
 
     it "immutable_asset is public and strips cookies" do
       policy = Marten::CDNCache::Policy.immutable_asset
       policy.public?.should be_true
-      policy.strip_cookies.should be_true
+      policy.strip_cookies?.should be_true
     end
   end
 
@@ -57,8 +57,8 @@ describe Marten::CDNCache::Policy do
       restored.visibility.should eq :public
       restored.max_age.should eq 300
       restored.s_maxage.should eq 86_400
-      restored.immutable.should be_true
-      restored.strip_cookies.should be_true
+      restored.immutable?.should be_true
+      restored.strip_cookies?.should be_true
     end
 
     it "round-trips a private no-store policy" do
