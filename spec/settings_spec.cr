@@ -7,6 +7,7 @@ describe Marten::CDNCache::Settings do
 
   it "defaults to enabled with no rules and a private default policy" do
     settings = Marten::CDNCache.settings
+    settings.enabled?.should be_true
     settings.enabled.should be_true
     settings.rules.should be_empty
     settings.default_policy.cache_control_header.should eq "private, no-store"
@@ -25,7 +26,10 @@ describe Marten::CDNCache::Settings do
 
   it "resets back to defaults" do
     Marten::CDNCache.settings.enabled = false
+    Marten::CDNCache.settings.enabled?.should be_false
+    Marten::CDNCache.settings.enabled.should be_false
     Marten::CDNCache.settings.reset!
+    Marten::CDNCache.settings.enabled?.should be_true
     Marten::CDNCache.settings.enabled.should be_true
   end
 end
